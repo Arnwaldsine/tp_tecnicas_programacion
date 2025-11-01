@@ -822,17 +822,17 @@ Proyecto desarrollado como trabajo práctico de Técnicas de Programación.
 │                    MENÚ PRINCIPAL                       │
 └─────────────────────────────────────────────────────────┘
               │
-    ┌─────────┼─────────┬─────────┬─────────┐
-    │         │         │         │         │
-    v         v         v         v         v
-┌─────┐   ┌─────┐   ┌─────┐   ┌─────┐   ┌─────┐
-│  1  │   │  2  │   │  3  │   │  4  │   │  5  │
-│Buscar│  │Vender│  │Reponer│ │Ranking│ │Salir│
-└─────┘   └─────┘   └─────┘   └─────┘   └─────┘
-    │         │         │         │         │
-    ├─Tipo    ├─Paginar ├─Paginar └─Query   └─exit()
-    ├─Marca   ├─Buscar  ├─Buscar    ORDER BY
-    └─Modelo  ├─Vender  └─Reponer   ventas DESC
+    ┌─────────┼─────────┬──────────────┬─────────┐
+    │         │         │              │         │
+    v         v         v              v         v
+┌──────┐   ┌──────┐   ┌───────┐   ┌───────┐   ┌─────┐
+│  1   │   │  2   │   │   3   │   │   4   │   │  5  │
+│Buscar│   │Vender│   │Reponer│   │Ranking│   │Salir│
+└──────┘   └──────┘   └───────┘   └───────┘   └─────┘
+    │         │         │             │          │
+    ├─Tipo    ├─Paginar ├─Paginar     └─Query    └─exit()
+    ├─Marca   ├─Buscar  ├─Buscar        ORDER BY
+    └─Modelo  ├─Vender  └─Reponer       ventas DESC
               │
               ├─Cantidad
               ├─Validar Stock
