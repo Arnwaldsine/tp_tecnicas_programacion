@@ -1,227 +1,441 @@
-import sqlite3
+from queries import gestion_queries as q
+from helpers import (
+    clear_screen,
+    conectar_db,
+    mostrar_resultados,
+    listar_tipos,
+    listar_marcas,
+    validar_tarjeta,
+    seleccionar_producto_para_venta,
+    seleccionar_producto_para_reponer,
+    COLOR_RESET,
+    COLOR_GREEN,
+    COLOR_BOLD
+)
 
-def conectar_db():
-    """Conecta con la base de datos"""
-    return sqlite3.connect('inventario.db')
+
+def buscar_por_tipo() -> bool:
+    """
+    Buscar productos por tipo usando la tabla tipos_producto.
+    Retorna True si el usuario eligió volver al menú principal (opción 0).
+    """
+    while True:
+        clear_screen()
+        tipos = listar_tipos()
+        if not tipos:
+            print("No hay tipos disponibles en la base de datos.")
+            input("Presione Enter para volver...")
+            return False
+
+        print("\nTipos disponibles:")
+        for tid, nombre in tipos:
+            print(f"{tid}. {nombre}")
+
+        print("0. Volver al menú principal")
+        entrada = input("Ingrese ID o nombre del tipo (o 0 para volver): ").strip()
+        if entrada == "0":
+            return True
+
+        tipo_id = None
+        # intentar por ID
+        if entrada.isdigit():
+            tipo_id = int(entrada)
+        else:
+            # buscar por nombre (case-insensitive)
+            for tid, nombre in tipos:
+                if nombre.lower() == entrada.lower():
+                    tipo_id = tid
+                    break
+
+        if tipo_id is None:
+            print("Tipo no encontrado.")
+            input("Presione Enter para volver...")
+            return False
+
+        conn = conectar_db()
+        cur = conn.cursor()
+        cur.execute(q.SELECT_POR_TIPO, (tipo_id,))
+        resultados = cur.fetchall()
+        conn.close()
+        mostrar_resultados(resultados)
+        input("\nPresione Enter para volver...")
+        return False
+
+
+def buscar_por_marca() -> bool:
+    """
+    Buscar productos por marca usando la tabla marcas.
+    Retorna True si el usuario eligió volver al menú principal (opción 0).
+    """
+    while True:
+        clear_screen()
+        marcas = listar_marcas()
+        if not marcas:
+            print("No hay marcas disponibles en la base de datos.")
+            input("Presione Enter para volver...")
+            return False
+
+        print("\nMarcas disponibles:")
+        for mid, nombre in marcas:
+            print(f"{mid}. {nombre}")
+
+        print("0. Volver al menú principal")
+        entrada = input("Ingrese ID o nombre de la marca (o 0 para volver): ").strip()
+        if entrada == "0":
+            return True
+
+        marca_id = None
+        if entrada.isdigit():
+            marca_id = int(entrada)
+        else:
+            for mid, nombre in marcas:
+                if nombre.lower() == entrada.lower():
+                    marca_id = mid
+                    break
+
+        if marca_id is None:
+            print("Marca no encontrada.")
+            input("Presione Enter para volver...")
+            return False
+
+        conn = conectar_db()
+        cur = conn.cursor()
+        cur.execute(q.SELECT_POR_MARCA, (marca_id,))
+        resultados = cur.fetchall()
+        conn.close()
+        mostrar_resultados(resultados)
+        input("\nPresione Enter para volver...")
+        return False
+
+
+def buscar_por_modelo() -> bool:
+    """
+    Buscar productos por modelo (coincidencia parcial).
+    Retorna True si el usuario eligió volver al menú principal (opción 0).
+    """
+    while True:
+        clear_screen()
+        print("0. Volver al menú principal")
+        entrada = input("Ingrese (parte de) modelo (o 0 para volver): ").strip()
+        if entrada == "0":
+            return True
+
+        if not entrada:
+            print("Modelo vacío.")
+            input("Presione Enter para volver...")
+            return False
+
+        conn = conectar_db()
+        cur = conn.cursor()
+        cur.execute(q.SELECT_POR_MODELO_LIKE, (f"%{entrada.lower()}%",))
+        resultados = cur.fetchall()
+        conn.close()
+        mostrar_resultados(resultados)
+        input("\nPresione Enter para volver...")
+        return False
+
 
 def buscar_producto():
-    """Opción 1: Buscar producto"""
+    """
+    Submenú de búsqueda.
+    """
     while True:
+        clear_screen()
         print("\n--- BUSCAR PRODUCTO ---")
+        print("0. Volver al menú principal")
         print("1. Por Tipo")
         print("2. Por Marca")
         print("3. Por Modelo")
-        print("4. Volver")
-        
-        opcion = input("\nSeleccione opción: ")
-        
+
+        opcion = input("\nSeleccione opción: ").strip()
+
+        if opcion == "0":
+            return  # vuelve al menú principal
         if opcion == "1":
-            buscar_por_tipo()
+            if buscar_por_tipo():
+                return
         elif opcion == "2":
-            buscar_por_marca()
+            if buscar_por_marca():
+                return
         elif opcion == "3":
-            buscar_por_modelo()
-        elif opcion == "4":
-            break
+            if buscar_por_modelo():
+                return
         else:
             print("Opción inválida")
+            input("Presione Enter para continuar...")
 
-def buscar_por_tipo():
-    """Buscar productos por tipo"""
-    conn = conectar_db()
-    cursor = conn.cursor()
-    
-    print("\nTipos disponibles: Notebook, Celular, Reloj")
-    tipo = input("Ingrese tipo: ").strip()
-    
-    cursor.execute("""
-        SELECT nombre, precio, stock, ventas 
-        FROM productos 
-        WHERE nombre LIKE ?
-    """, (f"%{tipo[0].lower()}%",))
-    
-    resultados = cursor.fetchall()
-    mostrar_resultados(resultados)
-    conn.close()
-
-def buscar_por_marca():
-    """Buscar productos por marca"""
-    conn = conectar_db()
-    cursor = conn.cursor()
-    
-    print("\nMarcas: Dell, Asus, HP, Motorola, Samsung, Xiaomi, Casio")
-    marca = input("Ingrese marca: ").strip().lower()
-    
-    cursor.execute("""
-        SELECT nombre, precio, stock, ventas 
-        FROM productos 
-        WHERE nombre LIKE ?
-    """, (f"%{marca[0]}%",))
-    
-    resultados = cursor.fetchall()
-    mostrar_resultados(resultados)
-    conn.close()
-
-def buscar_por_modelo():
-    """Buscar productos por modelo"""
-    conn = conectar_db()
-    cursor = conn.cursor()
-    
-    modelo = input("Ingrese modelo: ").strip()
-    
-    cursor.execute("""
-        SELECT nombre, precio, stock, ventas 
-        FROM productos 
-        WHERE nombre = ?
-    """, (modelo,))
-    
-    resultados = cursor.fetchall()
-    mostrar_resultados(resultados)
-    conn.close()
-
-def mostrar_resultados(resultados):
-    """Muestra los resultados de búsqueda"""
-    if resultados:
-        print("\n--- RESULTADOS ---")
-        for producto in resultados:
-            print(f"Modelo: {producto[0]} | Precio: ${producto[1]} | Stock: {producto[2]} | Ventas: {producto[3]}")
-    else:
-        print("\nNo se encontraron productos")
 
 def vender_producto():
-    """Opción 2: Vender producto"""
+    """
+    Flujo de venta actualizado con opción de cancelar en cualquier momento.
+    """
+    seleccionado = seleccionar_producto_para_venta()
+    if seleccionado is None:
+        return  # el usuario canceló y volvió al menú principal
+
+    prod_id, prod_modelo, prod_precio, prod_stock = seleccionado
+
     conn = conectar_db()
     cursor = conn.cursor()
-    
+
+    if prod_stock <= 0:
+        print("Producto sin stock")
+        input("Presione Enter para volver...")
+        conn.close()
+        return
+
+    # Solicitar cantidad
     while True:
-        print("\n--- VENDER PRODUCTO ---")
-        modelo = input("Ingrese modelo: ").strip()
+        clear_screen()
+        print("\n--- VENTA DE PRODUCTO ---")
+        print(f"Producto: {prod_modelo}")
+        print(f"Precio: ${prod_precio:.2f}")
+        print(f"Stock disponible: {prod_stock}")
+        print("\n0. Cancelar y volver al menú principal")
         
-        # Verificar si existe el producto
-        cursor.execute("SELECT nombre, precio, stock FROM productos WHERE nombre = ?", (modelo,))
-        producto = cursor.fetchone()
+        cantidad_input = input("\nIngrese cantidad a vender: ").strip()
         
-        if not producto:
-            print("Producto no encontrado")
+        if cantidad_input == "0":
+            print("\nVenta cancelada.")
+            input("Presione Enter para continuar...")
+            conn.close()
+            return
+        
+        try:
+            cantidad = int(cantidad_input)
+        except ValueError:
+            print("Cantidad inválida")
+            input("Presione Enter para continuar...")
             continue
-        
-        if producto[2] <= 0:
-            print("Producto sin stock")
+
+        if cantidad <= 0:
+            print("Cantidad debe ser mayor a 0")
+            input("Presione Enter para continuar...")
             continue
-        
-        cantidad = int(input("Ingrese cantidad: "))
-        
-        if cantidad > producto[2]:
-            print(f"Stock insuficiente. Disponible: {producto[2]}")
+
+        if cantidad > prod_stock:
+            print(f"Stock insuficiente. Disponible: {prod_stock}")
+            input("Presione Enter para continuar...")
             continue
+
+        # Cantidad válida, proceder al pago
+        total = prod_precio * cantidad
         
-        total = producto[1] * cantidad
-        print(f"\nTotal a pagar: ${total}")
-        
-        # Simulación de pago
+        # Proceso de pago
         while True:
+            clear_screen()
+            print("\n--- CONFIRMACIÓN DE VENTA ---")
+            print(f"Producto: {prod_modelo}")
+            print(f"Cantidad: {cantidad}")
+            print(f"Total a pagar: ${total:.2f}")
             print("\n--- PAGO ---")
-            tarjeta = input("Ingrese su tarjeta de crédito (16 dígitos): ")
+            print("0. Cancelar venta y volver")
             
-            print("\n0. Ingresar otra tarjeta")
-            print("1. Terminar pago")
-            print("2. Volver")
+            tarjeta = input("\nIngrese su tarjeta de crédito (16 dígitos, puede incluir espacios o guiones): ").strip()
             
-            opcion = input("\nSeleccione opción: ")
+            if tarjeta == "0":
+                print("\nVenta cancelada.")
+                input("Presione Enter para continuar...")
+                conn.close()
+                return
             
+            if not validar_tarjeta(tarjeta):
+                print("Formato de tarjeta inválido. Ejemplo válido: 1234 5678 9012 3456")
+                print("\n1. Reingresar tarjeta")
+                print("0. Cancelar venta")
+                opcion = input("\nSeleccione opción: ").strip()
+                if opcion == "0":
+                    print("\nVenta cancelada.")
+                    input("Presione Enter para continuar...")
+                    conn.close()
+                    return
+                else:
+                    continue
+
+            # Tarjeta válida, confirmar pago
+            clear_screen()
+            print("\n--- CONFIRMACIÓN FINAL ---")
+            print(f"Producto: {prod_modelo}")
+            print(f"Cantidad: {cantidad}")
+            print(f"Total: ${total:.2f}")
+            print(f"Tarjeta: ****-****-****-{tarjeta.replace(' ', '').replace('-', '')[-4:]}")
+            print("\n1. Confirmar y procesar pago")
+            print("2. Cambiar tarjeta")
+            print("0. Cancelar venta")
+
+            opcion = input("\nSeleccione opción: ").strip()
+
             if opcion == "1":
-                # Actualizar stock y ventas
-                cursor.execute("""
-                    UPDATE productos 
-                    SET stock = stock - ?, ventas = ventas + ? 
-                    WHERE nombre = ?
-                """, (cantidad, cantidad, modelo))
-                conn.commit()
-                print("\n¡Venta realizada con éxito!")
+                try:
+                    cursor.execute(q.UPDATE_RESTAR_STOCK_Y_SUMAR_VENTAS, (cantidad, cantidad, prod_id))
+                    conn.commit()
+                    clear_screen()
+                    print("\n" + "=" * 40)
+                    print("¡VENTA REALIZADA CON ÉXITO!")
+                    print("=" * 40)
+                    print(f"Producto: {prod_modelo}")
+                    print(f"Cantidad: {cantidad}")
+                    print(f"Total pagado: ${total:.2f}")
+                    print("=" * 40)
+                except Exception as e:
+                    conn.rollback()
+                    print("\nOcurrió un error al procesar la venta:", e)
+                finally:
+                    conn.close()
+                input("\nPresione Enter para continuar...")
+                return
+            elif opcion == "0":
+                print("\nVenta cancelada.")
+                input("Presione Enter para continuar...")
                 conn.close()
                 return
             elif opcion == "2":
-                conn.close()
-                return
-            elif opcion == "0":
                 continue
             else:
                 print("Opción inválida")
+                input("Presione Enter para continuar...")
+
 
 def reponer_producto():
-    """Opción 3: Reponer producto"""
+    """
+    Flujo de reposición con opción de cancelar en cualquier momento.
+    """
+    seleccionado = seleccionar_producto_para_reponer()
+    if seleccionado is None:
+        return  # usuario canceló
+
+    prod_id, prod_modelo, prod_precio, prod_stock = seleccionado
+
     conn = conectar_db()
     cursor = conn.cursor()
-    
+
+    # Solicitar cantidad a reponer
     while True:
-        print("\n--- REPONER PRODUCTO ---")
-        modelo = input("Ingrese modelo: ").strip()
+        clear_screen()
+        print("\n--- REPOSICIÓN DE STOCK ---")
+        print(f"Producto: {prod_modelo}")
+        print(f"Precio: ${prod_precio:.2f}")
+        print(f"Stock actual: {prod_stock}")
+        print("\n0. Cancelar y volver al menú principal")
         
-        cursor.execute("SELECT nombre, stock FROM productos WHERE nombre = ?", (modelo,))
-        producto = cursor.fetchone()
+        cantidad_input = input("\nIngrese cantidad a reponer: ").strip()
         
-        if not producto:
-            print("Producto no encontrado")
-            continue
-        
-        print(f"Stock actual: {producto[1]}")
-        cantidad = int(input("Ingrese cantidad a reponer: "))
-        
-        print("\n1. Cantidad equivocada")
-        print("0. Confirmar y volver")
-        
-        opcion = input("\nSeleccione opción: ")
-        
-        if opcion == "0":
-            cursor.execute("""
-                UPDATE productos 
-                SET stock = stock + ? 
-                WHERE nombre = ?
-            """, (cantidad, modelo))
-            conn.commit()
-            print("\n¡Reposición exitosa!")
+        if cantidad_input == "0":
+            print("\nReposición cancelada.")
+            input("Presione Enter para continuar...")
             conn.close()
             return
-        elif opcion == "1":
+        
+        try:
+            cantidad = int(cantidad_input)
+        except ValueError:
+            print("Cantidad inválida")
+            input("Presione Enter para continuar...")
+            continue
+
+        if cantidad <= 0:
+            print("Cantidad debe ser mayor a 0")
+            input("Presione Enter para continuar...")
+            continue
+
+        # Cantidad válida, mostrar confirmación
+        nuevo_stock = prod_stock + cantidad
+        clear_screen()
+        print("\n--- CONFIRMACIÓN DE REPOSICIÓN ---")
+        print(f"Producto: {prod_modelo}")
+        print(f"Stock actual: {prod_stock}")
+        print(f"Cantidad a reponer: {cantidad}")
+        print(f"Stock después de reposición: {nuevo_stock}")
+        print("\n1. Confirmar reposición")
+        print("2. Cambiar cantidad")
+        print("0. Cancelar reposición")
+
+        opcion = input("\nSeleccione opción: ").strip()
+
+        if opcion == "1":
+            try:
+                cursor.execute(q.UPDATE_SUMAR_STOCK, (cantidad, prod_id))
+                conn.commit()
+                clear_screen()
+                print("\n" + "=" * 40)
+                print("¡REPOSICIÓN EXITOSA!")
+                print("=" * 40)
+                print(f"Producto: {prod_modelo}")
+                print(f"Cantidad repuesta: {cantidad}")
+                print(f"Stock anterior: {prod_stock}")
+                print(f"Stock nuevo: {nuevo_stock}")
+                print("=" * 40)
+            except Exception as e:
+                conn.rollback()
+                print("\nOcurrió un error al reponer:", e)
+            finally:
+                conn.close()
+            input("\nPresione Enter para continuar...")
+            return
+        elif opcion == "0":
+            print("\nReposición cancelada.")
+            input("Presione Enter para continuar...")
+            conn.close()
+            return
+        elif opcion == "2":
             continue
         else:
             print("Opción inválida")
+            input("Presione Enter para continuar...")
+
 
 def productos_mas_vendidos():
-    """Opción 4: Productos más vendidos"""
+    """
+    Muestra los productos ordenados por ventas desc.
+    Si la cantidad vendida (ventas) es > 0 se muestra en color verde (resaltado),
+    si es 0 se muestra en color por defecto.
+    """
+    clear_screen()
     conn = conectar_db()
-    cursor = conn.cursor()
-    
-    print("\n--- PRODUCTOS MÁS VENDIDOS ---")
-    
-    cursor.execute("""
-        SELECT nombre, ventas 
-        FROM productos 
-        ORDER BY ventas DESC
-    """)
-    
-    resultados = cursor.fetchall()
-    
+    cur = conn.cursor()
+    cur.execute(q.SELECT_MAS_VENDIDOS)
+    resultados = cur.fetchall()
+
+    print("\n--- PRODUCTOS MÁS VENDIDOS ---\n")
+    if not resultados:
+        print("No hay productos para mostrar.")
+        input("\nPresione Enter para volver...")
+        conn.close()
+        return
+
     for i, producto in enumerate(resultados, 1):
-        print(f"{i}. Modelo: {producto[0]} | Cantidad vendida: {producto[1]}")
-    
+        modelo = producto[1]
+        ventas = producto[4]
+        marca = producto[5] or ""
+        tipo = producto[6] or ""
+        # Si ventas > 0 mostramos el texto de la línea en verde; si no, normal.
+        if ventas > 0:
+            line = (
+                f"{COLOR_GREEN}{i}. Modelo: {modelo} | Marca: {marca} | Tipo: {tipo} | "
+                f"{COLOR_BOLD}Cantidad vendida: {ventas}{COLOR_RESET}"
+            )
+        else:
+            line = f"{i}. Modelo: {modelo} | Marca: {marca} | Tipo: {tipo} | Cantidad vendida: {ventas}"
+        print(line)
+
     input("\n0. Volver (Presione Enter)")
     conn.close()
 
+
 def menu_principal():
-    """Menú principal del sistema"""
     while True:
-        print("\n" + "="*40)
+        clear_screen()
+        print("\n" + "=" * 40)
         print("SISTEMA DE GESTIÓN DE PRODUCTOS")
-        print("="*40)
+        print("=" * 40)
         print("1. Buscar producto")
         print("2. Vender producto")
         print("3. Reponer producto")
         print("4. Productos más vendidos")
         print("5. Salir")
-        
-        opcion = input("\nSeleccione opción: ")
-        
+
+        opcion = input("\nSeleccione opción: ").strip()
+
         if opcion == "1":
             buscar_producto()
         elif opcion == "2":
@@ -235,6 +449,8 @@ def menu_principal():
             break
         else:
             print("\nOpción inválida. Intente nuevamente.")
+            input("Presione Enter para continuar...")
+
 
 if __name__ == "__main__":
     menu_principal()
