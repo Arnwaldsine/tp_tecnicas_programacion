@@ -234,12 +234,12 @@ INICIO (Opción 2 del Menú Principal)
     ↓
 ┌───────────────────────────────────────────────────────┐
 │  SECCIÓN VENTAS: productos con stock (página 1)       │
-│  1. Dell Inspiron 15 | $850.00 | Stock: 15 | Dell    │
+│  1. Dell Inspiron 15 | $850.00 | Stock: 15 | Dell     │
 │  2. Dell XPS 13 | $920.00 | Stock: 10 | Dell          │
 │  3. Asus ZenBook | $780.00 | Stock: 12 | Asus         │
-│  ...                                                   │
+│  ...                                                  │
 │  20. Producto... (máximo 20 por página)               │
-│                                                        │
+│                                                       │
 │  Opciones:                                            │
 │  [n] Siguiente página                                 │
 │  [p] Página anterior                                  │
@@ -248,35 +248,35 @@ INICIO (Opción 2 del Menú Principal)
 │  [Número] Seleccionar producto (ej. 1)                │
 └───────────────────────────────────────────────────────┘
     ↓
-┌─── OPCIONES DEL USUARIO ───┐
-│                             │
-│ [n] → Siguiente página      │
-│        ├─ Hay productos?    │
-│        │   ├─ SÍ → Avanzar  │
-│        │   └─ NO → Mensaje  │
-│                             │
-│ [p] → Página anterior       │
-│        ├─ Estás en página 1?│
-│        │   ├─ SÍ → Mensaje  │
-│        │   └─ NO → Retroceder│
-│                             │
-│ [s] → BUSCAR POR NOMBRE     │
-│        ↓                    │
-│   Ingrese término: ____     │
-│        ↓                    │
-│   Sistema busca con LIKE    │
-│   en productos con stock > 0│
-│        ↓                    │
-│   Muestra hasta 200 resultados│
-│        ↓                    │
-│   Usuario selecciona número │
-│        └─ Producto seleccionado│
-│                             │
-│ [0] → Cancelar y volver     │
-│                             │
-│ [1-20] → Seleccionar        │
-│           producto de página│
-└─────────────────────────────┘
+┌─── OPCIONES DEL USUARIO ────────┐
+│                                 │
+│ [n] → Siguiente página          │
+│        ├─ Hay productos?        │
+│        │   ├─ SÍ → Avanzar      │
+│        │   └─ NO → Mensaje      │
+│                                 │
+│ [p] → Página anterior           │
+│        ├─ Estás en página 1?    │
+│        │   ├─ SÍ → Mensaje      │
+│        │   └─ NO → Retroceder   │
+│                                 │
+│ [s] → BUSCAR POR NOMBRE         │
+│        ↓                        │
+│   Ingrese término: ____         │
+│        ↓                        │
+│   Sistema busca con LIKE        │
+│   en productos con stock > 0    │
+│        ↓                        │
+│   Muestra hasta 200 resultados  │
+│        ↓                        │
+│   Usuario selecciona número     │
+│        └─ Producto seleccionado │
+│                                 │
+│ [0] → Cancelar y volver         │
+│                                 │
+│ [1-20] → Seleccionar            │
+│           producto de página    │
+└─────────────────────────────────┘
     ↓
 Producto seleccionado → (id, modelo, precio, stock)
     ↓
@@ -385,22 +385,22 @@ Permite añadir stock a cualquier producto del inventario con interfaz paginada 
 ```
 INICIO (Opción 3 del Menú Principal)
     ↓
-┌───────────────────────────────────────────────────────┐
-│  REPONER: productos (página 1)                        │
-│  (TODOS LOS PRODUCTOS, incluso sin stock)             │
-│                                                        │
+┌──────────────────────────────────────────────────────┐
+│  REPONER: productos (página 1)                       │
+│  (TODOS LOS PRODUCTOS, incluso sin stock)            │
+│                                                      │
 │  1. Dell Inspiron 15 | $850.00 | Stock: 15 | Dell    │
-│  2. Asus ZenBook | $780.00 | Stock: 0 | Asus          │
-│  3. HP Pavilion | $800.00 | Stock: 5 | HP             │
-│  ...                                                   │
-│                                                        │
-│  Opciones:                                            │
-│  [n] Siguiente página                                 │
-│  [p] Página anterior                                  │
-│  [s] Buscar por nombre                                │
-│  [0] Cancelar y volver                                │
-│  [Número] Seleccionar producto (ej. 2)                │
-└───────────────────────────────────────────────────────┘
+│  2. Asus ZenBook | $780.00 | Stock: 0 | Asus         │
+│  3. HP Pavilion | $800.00 | Stock: 5 | HP            │
+│  ...                                                 │
+│                                                      │
+│  Opciones:                                           │
+│  [n] Siguiente página                                │
+│  [p] Página anterior                                 │
+│  [s] Buscar por nombre                               │
+│  [0] Cancelar y volver                               │
+│  [Número] Seleccionar producto (ej. 2)               │
+└──────────────────────────────────────────────────────┘
     ↓
 Usuario navega/busca y selecciona producto
     ↓
@@ -423,7 +423,7 @@ Validación:
 Calcular nuevo_stock = stock_actual + cantidad
     ↓
 ┌─────────────────────────────────────────┐
-│   CONFIRMACIÓN DE REPOSICIÓN           │
+│   CONFIRMACIÓN DE REPOSICIÓN            │
 │   Producto: Asus ZenBook                │
 │   Stock actual: 0                       │
 │   Cantidad a reponer: 10                │
